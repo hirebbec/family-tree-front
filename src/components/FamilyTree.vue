@@ -7,6 +7,7 @@
         <div class="children">
           <div v-for="child in getChildren(root.relationships)" :key="child.id" class="family-member">
             <div>{{ child.name }} {{ child.surname }} ({{ child.relationship_type }})</div>
+            <FamilyTree :root="child" :isRoot="false" /> <!-- Рекурсивный компонент для детей -->
           </div>
         </div>
 
@@ -16,18 +17,20 @@
           <div class="siblings left">
             <div v-for="relative in getSisters(root.relationships)" :key="relative.id" class="family-member">
               <div>{{ relative.name }} {{ relative.surname }} ({{ relative.relationship_type }})</div>
+              <FamilyTree :root="relative" :isRoot="false" /> <!-- Рекурсивный компонент для сестёр -->
             </div>
           </div>
 
-          <!-- Корень в центре -->
-          <div class="root">
-            <div>{{ root.name }} {{ root.surname }} ({{ root.sex }})</div>
+          <!-- Корень в центре, отображаем только для корневого элемента -->
+          <div v-if="isRoot" class="root">
+            <div>{{ root.name }} {{ root.surname }}</div>
           </div>
 
           <!-- Братья справа -->
           <div class="siblings right">
             <div v-for="relative in getBrothers(root.relationships)" :key="relative.id" class="family-member">
               <div>{{ relative.name }} {{ relative.surname }} ({{ relative.relationship_type }})</div>
+              <FamilyTree :root="relative" :isRoot="false" /> <!-- Рекурсивный компонент для братьев -->
             </div>
           </div>
         </div>
@@ -36,6 +39,7 @@
         <div class="parents">
           <div v-for="parent in getParents(root.relationships)" :key="parent.id" class="family-member">
             <div>{{ parent.name }} {{ parent.surname }} ({{ parent.relationship_type }})</div>
+            <FamilyTree :root="parent" :isRoot="false" /> <!-- Рекурсивный компонент для родителей -->
           </div>
         </div>
       </div>
@@ -49,17 +53,11 @@
 <script>
 export default {
   name: 'FamilyTree',
-  data() {
-    return {
-      root: null, // корневой элемент дерева
-    };
-  },
-  async mounted() {
-    try {
-      const response = await fetch('http://localhost:8888/family-tree/v1/relationship/1');
-      this.root = await response.json();
-    } catch (error) {
-      console.error('Ошибка загрузки дерева:', error);
+  props: {
+    root: Object,   // Принимаем данные от родительского компонента
+    isRoot: {       // Новый пропс для отображения корня
+      type: Boolean,
+      default: true  // По умолчанию отображаем корень
     }
   },
   methods: {
@@ -87,13 +85,16 @@ export default {
 .family-tree-table {
   margin: 20px;
   padding: 20px;
-  border: 1px solid #ddd;
+  text-align: center;
+  align-items: center;
+  vertical-align: middle;
 }
 
 .tree-container {
   display: flex;
   flex-direction: column;
   align-items: center;
+  vertical-align: middle;
 }
 
 .family-tree {
@@ -104,6 +105,7 @@ export default {
     "family"
     "parents";
   gap: 20px;
+  
 }
 
 .family-tree-row {

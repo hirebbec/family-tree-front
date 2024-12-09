@@ -3,7 +3,8 @@
     <!-- Левая часть: дерево -->
     <div class="main-area">
       <h1>Генеалогическое древо</h1>
-      <FamilyTree />
+      <!-- Передаем загруженные данные в компонент FamilyTree -->
+      <FamilyTree :root="root" />
     </div>
 
     <!-- Правая панель: список участников -->
@@ -24,6 +25,20 @@ export default {
     UserList,
     FamilyTree,
   },
+  data() {
+    return {
+      root: null, // корневой элемент дерева
+    };
+  },
+  async mounted() {
+    try {
+      // Выполняем запрос только один раз при монтировании компонента
+      const response = await fetch('http://localhost:8888/family-tree/v1/relationship/1');
+      this.root = await response.json();
+    } catch (error) {
+      console.error('Ошибка загрузки дерева:', error);
+    }
+  }
 };
 </script>
 
